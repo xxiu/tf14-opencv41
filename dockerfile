@@ -4,15 +4,21 @@ MAINTAINER chxxiu@gmail.com
 RUN sed -i s/archive.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list \
     && sed -i s/security.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list 
 
-RUN apt-get update 
-
-RUN  apt-get install -y software-properties-common  
-# RUN  export DEBIAN_FRONTEND=noninteractive && apt-get install -y libopencv-dev
-RUN add-apt-repository "deb http://mirrors.aliyun.com/ubuntu/ xenial-security main"
-RUN apt-get update
-
-RUN apt-get install -y build-essential \
+RUN apt-get update && apt-get install build-essential \
     cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
     libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev 
 
-ADD . /data
+WORKDIR /data
+
+RUN git clone -b 4.1.1  https://github.com/opencv/opencv.git \
+    &&  git clone -b 4.1.1 https://github.com/opencv/opencv_contrib.git \
+    &&  cd opencv \
+    && mkdir build \
+    && cd build \
+    && cmake -D CMAKE_BUILD_TYPE=Release \
+         -DOPENCV_EXTRA_MODULES_PATH=/data/opencv_contrib/modules \
+         -DCMAKE_INSTALL_PREFIX=/usr/local ..\
+    && make -j4 \
+    && make install 
+    
+   
